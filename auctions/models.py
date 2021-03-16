@@ -2,7 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.fields.related import ForeignKey, ManyToManyField
 
-
 class User(AbstractUser):
     pass
 
@@ -10,17 +9,18 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = "categories"
     category = models.CharField(max_length=120)
+    def __str__(self):
+        return self.category
 
 class Listing(models.Model):
     name = models.CharField(max_length=120)
     description = models.TextField(max_length=500)
-    price = models.FloatField()
-    picture = models.ImageField()
+    price = models.DecimalField(max_digits=12, decimal_places=2)
+    picture = models.ImageField(upload_to='images/', blank=True)
     category = ManyToManyField(Category, related_name="listings")
     date_added = models.DateField(auto_now_add=True)
-    date_end = models.DateField()
-    user_id = ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
-
+    user = ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
+    
 class Bids(models.Model):
     class Meta:
         verbose_name_plural = "bids"
