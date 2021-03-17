@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.forms import ModelForm, Textarea
-from .models import Listing, User
+from .models import Category, Listing, User
 
 
 class NewListingForm(ModelForm):
@@ -26,11 +26,13 @@ class NewListingForm(ModelForm):
 def index(request):
 
     listings = Listing.objects.all
-    
-    print(listings)
+    catlinks = Listing.category.through.objects.all()
+    categories = Category.objects.all
 
     return render(request, "auctions/index.html", {
-        'listings' : listings
+        'listings' : listings,
+        'catlinks' : catlinks,
+        'categories' : categories
     })
 
 

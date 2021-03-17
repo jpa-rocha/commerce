@@ -3,15 +3,22 @@
 {% block body %}
     <h2>Active Listings</h2>
 
-    <div>
     {% for listing in listings %}
+    <div class='listings'>
         <p>{{listing.name}}</p>
         <p>{{listing.description}}</p>
         <p>{{listing.price}} €</p>
-        <p>{{listing.category}}</p>
+        {% for catlink in catlinks%}
+            {%if catlink.listing_id is listing.id%}
+                {% for category in categories%}
+                    {% if catlink.category_id is category.id %}
+                        <span>{{category.category}} </span>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
         <p>Created:{{listing.date_added}} By: {{listing.user}}</p>
         <img src={{MEDIA_URL}}{{listing.picture}} style='height :150px'>
-        
+     </div>   
     {% endfor %}
-    </div>
 {% endblock %}

@@ -17,7 +17,7 @@ class Listing(models.Model):
     description = models.TextField(max_length=500)
     price = models.DecimalField(max_digits=12, decimal_places=2)
     picture = models.ImageField(upload_to='images/', blank=True)
-    category = ManyToManyField(Category, related_name="listings")
+    category = ManyToManyField(Category, related_name="categories")
     date_added = models.DateField(auto_now_add=True)
     user = ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
     
