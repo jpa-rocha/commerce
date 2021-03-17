@@ -3,5 +3,15 @@
 {% block body %}
     <h2>Active Listings</h2>
 
-    TODO
+    <div>
+    {% for listing in listings %}
+        <p>{{listing.name}}</p>
+        <p>{{listing.description}}</p>
+        <p>{{listing.price}} €</p>
+        <p>{{listing.category}}</p>
+        <p>Created:{{listing.date_added}} By: {{listing.user}}</p>
+        <img src={{MEDIA_URL}}{{listing.picture}} style='height :150px'>
+        
+    {% endfor %}
+    </div>
 {% endblock %}
