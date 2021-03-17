@@ -1,9 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.forms import widgets
-from django.forms.models import modelformset_factory
-from django.forms.widgets import  HiddenInput, NumberInput, Select, TextInput
-from django.http import HttpResponse, HttpResponseRedirect, request
+from django.forms.widgets import  CheckboxSelectMultiple, NumberInput, TextInput
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.forms import ModelForm, Textarea
@@ -19,14 +17,21 @@ class NewListingForm(ModelForm):
             'name': TextInput(attrs={'placeholder' : 'Your listing name'}),
             'description' : Textarea(attrs={'placeholder' : 'Short description of your item'}),
             'price' : NumberInput(attrs={'min' : '0.01', 'step' : 'any', 'placeholder' : '€'}),
-            
+            'category' : CheckboxSelectMultiple()
         }
         
 
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+
+    listings = Listing.objects.all
+    
+    print(listings)
+
+    return render(request, "auctions/index.html", {
+        'listings' : listings
+    })
 
 
 def login_view(request):
@@ -92,7 +97,7 @@ def create(request):
                                              user=user)
             listing.category.set(form.cleaned_data['category'])
            
-            return render(request, "auctions/index.html")
+            return HttpResponseRedirect(reverse("index"))
         else:
             print("NOT VALID")
             return render(request, "auctions/create.html",{
