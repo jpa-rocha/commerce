@@ -2,23 +2,54 @@
 
 {% block body %}
     <h2>Active Listings</h2>
-
+    <div class='container-fluid'>
+    <div class='row justify-content-center'>
     {% for listing in listings %}
-    <div class='listings'>
-        <p>{{listing.name}}</p>
-        <p>{{listing.description}}</p>
-        <p>{{listing.price}} €</p>
-        {% for catlink in catlinks%}
-            {%if catlink.listing_id is listing.id%}
-                {% for category in categories%}
-                    {% if catlink.category_id is category.id %}
-                        <span>{{category.category}} </span>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-        {% endfor %}
-        <p>Created:{{listing.date_added}} By: {{listing.user}}</p>
-        <img src={{MEDIA_URL}}{{listing.picture}} style='height :150px'>
-     </div>   
+    <div class="col-4" style='display : inline-block'>
+    <div class='card bg-light mb-3'>
+    <h4 class="card-header">{{listing.name}}</h4>
+        <div class='card-body'>
+        <img src={{MEDIA_URL}}{{listing.picture}} style='height :200px ; width : auto' class='card-img-bottom img-fluid'>
+            <h5 style='margin-top : 10px'>Listing description:</h5>
+            <p class='card-text'>{{listing.description}}</p>
+            <h5>Current Price:</h5>
+            <p class='card-text'>{{listing.price}} €</p>
+            <h5>Listing categories:</h5>
+            <p>
+            {% for catlink in catlinks%}
+                {%if catlink.listing_id is listing.id%}
+                    {% for category in categories%}
+                        {% if catlink.category_id is category.id %}
+                        <a href="#" class="btn btn-primary" name='{{category.category}}'>{{category.category}}</a>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            </p>
+            <p class='card-text'><span style='font-weight : bold'>Created: </span>{{listing.date_added}}</p>
+            <p class='card-text'><span style='font-weight : bold'>By: </span>{{listing.user}}</p>
+            
+        </div>
+            {% if user == listing.user %}
+            <div class="card-footer">
+                <p class='card-text'>This item was listed by you.</p>
+            </div>
+            {% elif inlist == True  %}
+            {% for item in watchlist%}
+                {% if user.id is item.user_id and listing.id is item.item_id %}
+                <div class="card-footer">
+                <a href="{% url 'watchlist' listing.id%}" class="card-text" name='{{listing.id}}'>Remove from Watchlist</a>
+                </div>   
+                {% endif %}
+            {% endfor %}
+            {% else %}
+            <div class="card-footer">
+                <a href="{% url 'watchlist' listing.id %}" class="card-text" name='{{listing.id}}'>Add to Watchlist</a>
+            </div>
+        {% endif %}
+    </div>   
+    </div>  
     {% endfor %}
+    </div> 
+    </div>  
 {% endblock %}

@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.forms import ModelForm, Textarea
-from .models import Category, Listing, User
+from .models import Category, Listing, User, Watchlist
 
 
 class NewListingForm(ModelForm):
@@ -21,17 +21,45 @@ class NewListingForm(ModelForm):
         }
         
 
-
-
 def index(request):
-
     listings = Listing.objects.all
     catlinks = Listing.category.through.objects.all()
     categories = Category.objects.all
+    watchlist = Watchlist.objects.all
 
     return render(request, "auctions/index.html", {
         'listings' : listings,
         'catlinks' : catlinks,
+        'categories' : categories,
+        'watchlist' : watchlist
+    })
+
+def watchlist(request, itemid):
+    watchlist = Watchlist.objects.all
+    listings = Listing.objects.all
+    inlist = True
+    if itemid != "list": 
+        watchlist = Watchlist.objects.all
+        user = request.user
+        itemid = int(itemid)
+        item = Listing.objects.get(pk=itemid)
+        addition = Watchlist.objects.create(user=user,item=item)
+        inlist = True
+        return HttpResponseRedirect(reverse('index'),{
+            'watchlist' : watchlist,
+            'inlist' : inlist
+        })
+    else:
+        return render(request, "auctions/watchlist.html",{
+            'watchlist' : watchlist,
+            'listings' : listings
+
+        })
+
+
+def categories(request):
+    categories = Category.objects.all
+    return render(request,'auctions/categories.html',{
         'categories' : categories
     })
 
@@ -95,8 +123,8 @@ def create(request):
             print(request.FILES['picture'])
             user = request.user
             listing = Listing.objects.create(name=form.cleaned_data['name'], description=form.cleaned_data['description'],
-                                             price=form.cleaned_data['price'], picture=request.FILES['picture'],
-                                             user=user)
+                                             price=form.cleaned_data['price'], original_price=form.cleaned_data['price'], 
+                                             picture=request.FILES['picture'], user=user)
             listing.category.set(form.cleaned_data['category'])
            
             return HttpResponseRedirect(reverse("index"))

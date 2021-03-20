@@ -16,6 +16,7 @@ class Listing(models.Model):
     name = models.CharField(max_length=120)
     description = models.TextField(max_length=500)
     price = models.DecimalField(max_digits=12, decimal_places=2)
+    original_price = models.DecimalField(max_digits=12, decimal_places=2, default=price)
     picture = models.ImageField(upload_to='images/', blank=True)
     category = ManyToManyField(Category, related_name="categories")
     date_added = models.DateField(auto_now_add=True)
