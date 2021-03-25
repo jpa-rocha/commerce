@@ -34,22 +34,30 @@
             <div class="card-footer">
                 <p class='card-text'>This item was listed by you.</p>
             </div>
-            {% elif inlist == True  %}
-            {% for item in watchlist%}
-                {% if user.id is item.user_id and listing.id is item.item_id %}
-                <div class="card-footer">
-                <a href="{% url 'watchlist' listing.id%}" class="card-text" name='{{listing.id}}'>Remove from Watchlist</a>
-                </div>   
+            {% else  %}
+                {%if listing.id in watchlist %}
+                    <div class="card-footer">
+                        <a href="{% url 'watchlist' listing.id%}" class="card-text" name='{{listing.id}}'>Remove from Watchlist</a>
+                    </div>
+                {% else %}
+                    <div class="card-footer">
+                        <a href="{% url 'watchlist' listing.id %}" class="card-text" name='{{listing.id}}'>Add to Watchlist</a>
+                    </div>
                 {% endif %}
-            {% endfor %}
-            {% else %}
-            <div class="card-footer">
-                <a href="{% url 'watchlist' listing.id %}" class="card-text" name='{{listing.id}}'>Add to Watchlist</a>
-            </div>
-        {% endif %}
+            {% endif %}
     </div>   
     </div>  
     {% endfor %}
     </div> 
     </div>  
 {% endblock %}
+                
+                    <div class="card-footer">
+                        <a href="{% url 'watchlist' listing.id%}" class="card-text" name='{{listing.id}}'>Remove from Watchlist</a>
+                    </div>
+
+                    
+                    <div class="card-footer">
+                        <a href="{% url 'watchlist' listing.id %}" class="card-text" name='{{listing.id}}'>Add to Watchlist</a>
+                    </div>
+                 
