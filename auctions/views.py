@@ -31,7 +31,6 @@ def index(request):
     inlist = Watchlist.objects.filter(user_id=user.id)
     for i in inlist:
         wlist.append(i.item.id)
-    print(wlist)
     return render(request, "auctions/index.html", {
         'listings' : listings,
         'catlinks' : catlinks,
@@ -46,7 +45,7 @@ def watchlist(request, itemid):
     catlinks = Listing.category.through.objects.all()
     categories = Category.objects.all
     user = request.user
-    if itemid != "list":
+    if itemid != " ":
         itemid = int(itemid)
         item = Listing.objects.get(pk=itemid)
         inlist = Watchlist.objects.filter(user_id=user.id, item_id = item)
@@ -67,11 +66,35 @@ def watchlist(request, itemid):
         })
 
 
-def categories(request):
+def categories(request, cat):
+    watchlist = Watchlist.objects.all
+    listings = Listing.objects.all
+    catlinks = Listing.category.through.objects.all()
     categories = Category.objects.all
-    return render(request,'auctions/categories.html',{
-        'categories' : categories
-    })
+    if cat == 'list':
+        catlist = 'catlist'
+        return render(request,'auctions/categories.html',{
+            'categories' : categories,
+            'catlist' : catlist
+        })
+    else:
+        cat = cat
+        category = Category.objects.get(category=cat)
+        incat = []
+        for i in catlinks:
+            if i.category_id == category.id:
+                incat.append(i.listing_id)
+        
+        
+        return render(request,'auctions/categories.html',{
+            'watchlist' : watchlist,
+            'listings' : listings,
+            'catlinks' : catlinks,
+            'categories' : categories,
+            'incat' : incat
+
+        })
+
 
 
 def login_view(request):
