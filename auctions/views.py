@@ -43,6 +43,8 @@ def index(request):
 def watchlist(request, itemid):
     watchlist = Watchlist.objects.all
     listings = Listing.objects.all
+    catlinks = Listing.category.through.objects.all()
+    categories = Category.objects.all
     user = request.user
     if itemid != "list":
         itemid = int(itemid)
@@ -51,14 +53,16 @@ def watchlist(request, itemid):
         check = inlist.exists()
         if not check:
             addition = Watchlist.objects.create(user=user,item=item)
-            return HttpResponseRedirect(reverse('index'))
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
         else:
             deletion = Watchlist.objects.filter(user_id=user.id, item_id = item).delete()
-            return HttpResponseRedirect(reverse('index'))
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     else:
         return render(request, "auctions/watchlist.html",{
             'watchlist' : watchlist,
-            'listings' : listings
+            'listings' : listings,
+            'catlinks' : catlinks,
+            'categories' : categories,
 
         })
 
