@@ -1,5 +1,7 @@
 {% extends "auctions/layout.html" %}
-
+{% block title %}
+Watchlist
+{% endblock %}
 {% block body %}
     <h2>Watchlist</h2>
 
@@ -7,13 +9,14 @@
     <div class='row justify-content-center'>
     {% for entry in watchlist %}
         {% if entry.user == user %}
+        {% if not closed %}
             <div class="col-4" style='display : inline-block'>
             <div class='card bg-light mb-3'>
-            <h4 class="card-header">{{entry.item.name}}</h4>
+            <h4 class="card-header"><a href="{% url 'listing' entry.item.id%}" class="text-dark">{{entry.item.name}}</a></h4>
                 <div class='card-body'>
-                <img src={{MEDIA_URL}}{{entry.item.picture}} style='height :200px ; width : auto' class='card-img-bottom img-fluid'>
+                <img src={{MEDIA_URL}}{{entry.item.picture}} style='height :200px ; width : auto' class='card-img-bottom img-fluid' alt='a picture of {{entry.item.name}}'>
                     <h5 style='margin-top : 10px'>Listing description:</h5>
-                    <p class='card-text'>{{entry.item.description}}</p>
+                    <p class='card-text' style='height:150px'>{{entry.item.description}}</p>
                     <h5>Current Price:</h5>
                     <p class='card-text'>{{entry.item.price}} €</p>
                     <h5>Listing categories:</h5>
@@ -37,6 +40,7 @@
                 </div>
             </div>   
             </div>
+        {% endif %}
         {% endif %}
     {% empty %}
     <p>There are currently no items in your watchlist.</p>  

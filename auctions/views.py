@@ -5,12 +5,11 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.forms import ModelForm, Textarea
-from .models import Category, Listing, User, Watchlist
+from .models import Bids, Category, Comments, Listing, User, Watchlist
 
 
 class NewListingForm(ModelForm):
-    class Meta:
-         
+    class Meta:  
          model = Listing
          fields = ['name', 'description', 'price', 'picture', 'category']
          widgets = {
@@ -20,6 +19,7 @@ class NewListingForm(ModelForm):
             'category' : CheckboxSelectMultiple()
         }
         
+
 
 def index(request):
     user = request.user
@@ -62,7 +62,6 @@ def watchlist(request, itemid):
             'listings' : listings,
             'catlinks' : catlinks,
             'categories' : categories,
-
         })
 
 
@@ -91,10 +90,72 @@ def categories(request, cat):
             'listings' : listings,
             'catlinks' : catlinks,
             'categories' : categories,
-            'incat' : incat
-
+            'incat' : incat,
+            'cat' : cat
         })
+#listing
+def listing(request, listnum):
+    listnum = listnum
+    listitem = Listing.objects.get(pk=listnum)
+    watchlist = Watchlist.objects.all
+    listings = Listing.objects.all
+    catlinks = Listing.category.through.objects.all()
+    categories = Category.objects.all
+    user = request.user
+    wlist = []
+    inlist = Watchlist.objects.filter(user_id=user.id)
+    comments = Comments.objects.filter(item=listitem)
+    step = 0.1
+    price = int(listitem.price) + step
+    for i in inlist:
+        wlist.append(i.item.id)
+    return render(request,'auctions/listing.html',{
+        'watchlist' : wlist,
+        'listings' : listings,
+        'catlinks' : catlinks,
+        'categories' : categories,
+        'item' : listitem,
+        'comments' : comments,
+        'price' : price,
+        'step' : step
+    })
+#bids
+def bids(request):
+    watchlist = Watchlist.objects.all
+    listings = Listing.objects.all
+    catlinks = Listing.category.through.objects.all()
+    categories = Category.objects.all
+    user = request.user
+    if request.method == 'POST':   
+        bid = float(request.POST['bid'])
+        itemid = request.POST['item']
+        item = Listing.objects.get(pk=itemid)
+        currentprice = float(request.POST['price'])
+        if bid > currentprice:
+            newbid = Bids.objects.create(user=user, item=item, amount=bid)
+            item.price = bid
+            item.save()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    else:
+        yourbids = Bids.objects.filter(user=user)
+        return render(request, 'auctions/bids.html',{
+            'bids' : yourbids,
+            'watchlist' : watchlist,
+            'listings' : listings,
+            'catlinks' : catlinks,
+            'categories' : categories,
+        })
+    
 
+#comments
+def comments(request):
+    comment = request.POST['comment']
+    user = request.user
+    itemid = request.POST['item']
+    item = Listing.objects.get(pk=itemid)
+    newcomment = Comments.objects.create(user=user, item=item, comment=comment)
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
 def login_view(request):
@@ -153,7 +214,6 @@ def create(request):
     if request.method == "POST":
         form = NewListingForm(request.POST)
         if form.is_valid():
-            print(request.FILES['picture'])
             user = request.user
             listing = Listing.objects.create(name=form.cleaned_data['name'], description=form.cleaned_data['description'],
                                              price=form.cleaned_data['price'], original_price=form.cleaned_data['price'], 
@@ -162,13 +222,11 @@ def create(request):
            
             return HttpResponseRedirect(reverse("index"))
         else:
-            print("NOT VALID")
             return render(request, "auctions/create.html",{
                 "form" : form
             })
     else:
         user = request.user
-        print(user.id)
         return render(request, "auctions/create.html",{
             "form" : NewListingForm()
         })

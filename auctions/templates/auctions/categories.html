@@ -1,5 +1,11 @@
 {% extends "auctions/layout.html" %}
-
+{% block title %}
+{% if catlist == 'catlist'%}
+Categories
+{% else %}
+{{cat}}
+{% endif %}
+{% endblock %}
 {% block body %}
     <h2>Categories</h2>
     {% if catlist == 'catlist'%}
@@ -14,13 +20,14 @@
     <div class='row justify-content-center'>
     {% for listing in listings %}
         {% if listing.id in incat %}
+        {% if not closed %}
             <div class="col-4" style='display : inline-block'>
             <div class='card bg-light mb-3'>
-            <h4 class="card-header">{{listing.name}}</h4>
+            <h4 class="card-header"><a href="{% url 'listing' listing.id%}" class="text-dark">{{listing.name}}</a></h4>
                 <div class='card-body'>
-                <img src={{MEDIA_URL}}{{listing.picture}} style='height :200px ; width : auto' class='card-img-bottom img-fluid'>
+                <img src={{MEDIA_URL}}{{listing.picture}} style='height :200px ; width : auto' class='card-img-bottom img-fluid' alt='a picture of {{listing.name}}'>
                     <h5 style='margin-top : 10px'>Listing description:</h5>
-                    <p class='card-text'>{{listing.description}}</p>
+                    <p class='card-text' style='height:150px'>{{listing.description}}</p>
                     <h5>Current Price:</h5>
                     <p class='card-text'>{{listing.price}} €</p>
                     <h5>Listing categories:</h5>
@@ -39,6 +46,7 @@
                     <p class='card-text'><span style='font-weight : bold'>By: </span>{{listing.user}}</p>
                     
                 </div>
+                    {% if user.is_authenticated %}
                     {% if user == listing.user %}
                     <div class="card-footer">
                         <p class='card-text'>This item was listed by you.</p>
@@ -54,8 +62,10 @@
                             </div>
                         {% endif %}
                     {% endif %}
+                    {% endif %}
             </div>   
             </div> 
+        {% endif %}
         {% endif %} 
     {% endfor %}
     

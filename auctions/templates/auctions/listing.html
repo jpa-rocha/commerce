@@ -1,0 +1,80 @@
+{% extends "auctions/layout.html" %}
+{% block title %}
+{{item.name}}
+{% endblock %}
+{% block body %}
+<div class='container-fluid'>
+    <div class='row'>
+        <div class='col-8'>
+        <h3 style='margin-bottom: 15px'>{{item.name}}</h3>
+        {% if user.is_authenticated %}
+            {% if user == item.user %}
+                <p>This item was listed by you.</p>
+            {% else  %}
+                {%if item.id in watchlist %}
+                    <a href="{% url 'watchlist' item.id%}"><button type="button" class="btn btn-outline-primary" >Remove from Watchlist</button></a>
+                {% else %}
+                    <a href="{% url 'watchlist' item.id%}"><button type="button" class="btn btn-outline-primary" >Add to Watchlist</button></a>
+                {% endif %}
+            {% endif %}  
+            {% endif %}
+        <h5 style='margin-top: 15px'>Listing Description</h5>
+        <p>{{item.description}}</p>
+        <h5>Current Price</h5>
+        <p>{{item.price}} €</p>
+        {% if user.is_authenticated %}
+            {% if user != item.user %}
+            <form action="{% url 'bids' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="input-group">
+                    <div class="input-group-append">
+                        <span class="input-group-text">New Bid</span>
+                    </div>
+                    <input type="number" min='{{price}}' step='{{step}}' class="form-control" aria-label="Amount (to the nearest Euro)" name="bid">
+                    
+                    <div class="input-group-append">
+                        <span class="input-group-text">€</span>
+                    </div>
+                    <input type='hidden' name='item' value='{{item.id}}'>
+                    <input type='hidden' name='price' value='{{item.price}}'>
+                </div>
+                <input type="submit" class="btn btn-outline-primary float-right" value="Submit" style='margin-top: 15px'>
+                </form>
+            {% else %}
+                <a href="#"><button type="button" class="btn btn-outline-primary">End Auction</button></a>
+            {% endif %}
+        {% else %}
+            <p><strong>You must be logged in to place bids.</strong></p>
+        {% endif %}
+        </div>
+        <div class='col-4'>
+            <img src={{MEDIA_URL}}{{item.picture}} class="img-fluid" alt='a picture of {{item.name}}'>
+        </div>
+    </div>
+    <div class='row' style='margin-top : 20px'>
+    <div class='col-12'>
+        <h5>Comments</h5>
+        <form action="{% url 'comments' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+            <div class="input-group">
+                <textarea class="form-control" name='comment' aria-label="With textarea" maxlength="750"></textarea>
+                <input type='hidden' name='item' value='{{item.id}}'>
+            </div>
+            <input type="submit" class="btn btn-outline-primary float-right" value="Submit" style='margin-top: 15px'>
+        </form>
+    </div>
+    </div>
+    <div class='row' style='margin-top : 20px'>
+    <div class='col-12'>
+    {% if not comments %}
+        <p style='text-align: center'><strong>There are currently no comments on this bid.</strong></p>
+    {% else %}
+    {% for comment in comments %}
+        <p style='text-align: left'><strong>Posted by:</strong> {{comment.user}}<span style='float:right;'>{{comment.date_added}}</span></p>
+        <p style='border-bottom:1px solid black'>{{comment.comment}}</p>
+    {% endfor %}
+    {% endif %}
+    </div>
+    </div>
+</div>
+{% endblock %}

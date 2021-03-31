@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.fields import BooleanField
 from django.db.models.fields.related import ForeignKey, ManyToManyField
 
 class User(AbstractUser):
@@ -21,13 +22,14 @@ class Listing(models.Model):
     category = ManyToManyField(Category, related_name="categories")
     date_added = models.DateField(auto_now_add=True)
     user = ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
+    closed = BooleanField(default=False)
     
 class Bids(models.Model):
     class Meta:
         verbose_name_plural = "bids"
     user = ForeignKey(User, on_delete=models.CASCADE, related_name="bids")
     item = ForeignKey(Listing, on_delete=models.CASCADE, related_name="bids")
-    amount = models.FloatField()
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
 
 class Comments(models.Model):
     class Meta:
@@ -35,6 +37,7 @@ class Comments(models.Model):
     user = ForeignKey(User, on_delete=models.PROTECT, related_name="comments")
     item = ForeignKey(Listing, on_delete=models.CASCADE, related_name="comments")
     comment = models.TextField(max_length=750)
+    date_added = models.DateField(auto_now_add=True)
 
 class Watchlist(models.Model):
     user = ForeignKey(User, on_delete=models.CASCADE, related_name="watching")
