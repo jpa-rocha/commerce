@@ -20,7 +20,7 @@ Categories
     <div class='row justify-content-center'>
     {% for listing in listings %}
         {% if listing.id in incat %}
-        {% if not closed %}
+        {% if listing.closed == False %}
             <div class="col-4" style='display : inline-block'>
             <div class='card bg-light mb-3'>
             <h4 class="card-header"><a href="{% url 'listing' listing.id%}" class="text-dark">{{listing.name}}</a></h4>

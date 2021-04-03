@@ -41,7 +41,11 @@
                 <input type="submit" class="btn btn-outline-primary float-right" value="Submit" style='margin-top: 15px'>
                 </form>
             {% else %}
-                <a href="#"><button type="button" class="btn btn-outline-primary">End Auction</button></a>
+            <form action="{% url 'listing' item.id %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+                <input type="submit" name='end' class="btn btn-outline-primary" value='End Auction'>
+                <input type='hidden' name='item' value='{{item.id}}'>
+            </form>
             {% endif %}
         {% else %}
             <p><strong>You must be logged in to place bids.</strong></p>

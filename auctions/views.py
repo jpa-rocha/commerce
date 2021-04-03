@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.forms.widgets import  CheckboxSelectMultiple, NumberInput, TextInput
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.forms import ModelForm, Textarea
 from .models import Bids, Category, Comments, Listing, User, Watchlist
@@ -17,8 +17,7 @@ class NewListingForm(ModelForm):
             'description' : Textarea(attrs={'placeholder' : 'Short description of your item'}),
             'price' : NumberInput(attrs={'min' : '0.01', 'step' : 'any', 'placeholder' : '€'}),
             'category' : CheckboxSelectMultiple()
-        }
-        
+        }       
 
 
 def index(request):
@@ -36,8 +35,8 @@ def index(request):
         'catlinks' : catlinks,
         'categories' : categories,
         'watchlist' : wlist
-        
     })
+
 
 def watchlist(request, itemid):
     watchlist = Watchlist.objects.all
@@ -83,8 +82,6 @@ def categories(request, cat):
         for i in catlinks:
             if i.category_id == category.id:
                 incat.append(i.listing_id)
-        
-        
         return render(request,'auctions/categories.html',{
             'watchlist' : watchlist,
             'listings' : listings,
@@ -93,7 +90,8 @@ def categories(request, cat):
             'incat' : incat,
             'cat' : cat
         })
-#listing
+
+
 def listing(request, listnum):
     listnum = listnum
     listitem = Listing.objects.get(pk=listnum)
@@ -109,6 +107,13 @@ def listing(request, listnum):
     price = int(listitem.price) + step
     for i in inlist:
         wlist.append(i.item.id)
+    if request.method == 'POST':
+        itemid = request.POST['item']
+        item = Listing.objects.get(pk=itemid)
+        item.closed = True
+        item.save()
+        return HttpResponseRedirect(reverse("index"))
+        
     return render(request,'auctions/listing.html',{
         'watchlist' : wlist,
         'listings' : listings,
@@ -119,16 +124,17 @@ def listing(request, listnum):
         'price' : price,
         'step' : step
     })
-#bids
+
+
 def bids(request):
     watchlist = Watchlist.objects.all
     listings = Listing.objects.all
     catlinks = Listing.category.through.objects.all()
     categories = Category.objects.all
     user = request.user
-    if request.method == 'POST':   
-        bid = float(request.POST['bid'])
+    if request.method == 'POST':  
         itemid = request.POST['item']
+        bid = float(request.POST['bid'])
         item = Listing.objects.get(pk=itemid)
         currentprice = float(request.POST['price'])
         if bid > currentprice:
@@ -137,17 +143,23 @@ def bids(request):
             item.save()
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     else:
-        yourbids = Bids.objects.filter(user=user)
+        bids = Bids.objects.filter(user=user)
+        bidset = set()
+        for bid in bids:
+            print(bid.item.id)
+            bidset.add(bid.item.id)
+        print(bidset)
+        # for bid in bids if:  bid.amount == bid.item.price bid.user gets green message else red
         return render(request, 'auctions/bids.html',{
-            'bids' : yourbids,
+            'bids' : bids,
+            'bidset' : bidset,
             'watchlist' : watchlist,
             'listings' : listings,
             'catlinks' : catlinks,
             'categories' : categories,
-        })
-    
+        })  
 
-#comments
+
 def comments(request):
     comment = request.POST['comment']
     user = request.user

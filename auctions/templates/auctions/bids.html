@@ -3,47 +3,52 @@
 Your Bids
 {% endblock %}
 {% block body %}
-<h2>Active Listings</h2>
+<h2>Current Bids</h2>
     <div class='container-fluid'>
     <div class='row justify-content-center'>
     {% for bid in bids %}
-    <div class="col-4" style='display : inline-block'>
-    <div class='card bg-light mb-3'>
-    <h4 class="card-header"><a href="{% url 'listing' listing.id%}" class="text-dark">{{bid.item.name}}</a></h4>
-        <div class='card-body'>
-        <img src={{MEDIA_URL}}{{bid.item.picture}} style='height :200px ; width : auto' class='card-img-bottom img-fluid' alt='a picture of {{bid.item.name}}'>
-            <h5 style='margin-top : 10px'>Listing description:</h5>
-            <p class='card-text' style='height:150px'>{{bid.item.description}}</p>
-            <h5>Current Price:</h5>
-            <p class='card-text'>{{bid.item.price}} €</p>
-            <h5>Listing categories:</h5>
-            <p>
-            {% for catlink in catlinks%}
-                {%if catlink.listing_id is bid.item.id%}
-                    {% for category in categories%}
-                        {% if catlink.category_id is category.id %}
-                        <a href="{% url 'categories' category.category %}" class="btn btn-primary" name='{{category.category}}'>{{category.category}}</a>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-            {% endfor %}
-            </p>
-            <p class='card-text'><span style='font-weight : bold'>Created: </span>{{bid.item.date_added}}</p>
-            <p class='card-text'><span style='font-weight : bold'>By: </span>{{bid.item.user}}</p>
-        </div>
-        {% if user.is_authenticated %}    
-            {%if bid.item.id in watchlist %}
-                <div class="card-footer">
-                    <a href="{% url 'watchlist' listing.id%}" class="card-text" name='{{bid.item.id}}'>Remove from Watchlist</a>
-                </div>
-            {% else %}
-                <div class="card-footer">
-                    <a href="{% url 'watchlist' listing.id %}" class="card-text" name='{{bid.item.id}}'>Add to Watchlist</a>
-                </div>
-            {% endif %}
+    {%if bid.item.id in bidset %}
+        <div class="col-4" style='display : inline-block'>
+        <div class='card bg-light mb-3'>
+        {% if bid.item.closed == False %}
+        <h4 class="card-header"><a href="{% url 'listing' bid.item.id%}" class="text-dark">{{bid.item.name}}</a></h4>
+        {% else %}
         {% endif %}
-    </div>   
-    </div>
+            <div class='card-body'>
+            <img src={{MEDIA_URL}}{{bid.item.picture}} style='height :200px ; width : auto' class='card-img-bottom img-fluid' alt='a picture of {{bid.item.name}}'>
+                <h5 style='margin-top : 10px'>Listing description:</h5>
+                <p class='card-text' style='height:150px'>{{bid.item.description}}</p>
+                <h5>Current Price:</h5>
+                <p class='card-text'>{{bid.item.price}} €</p>
+                <h5>Listing categories:</h5>
+                <p>
+                {% for catlink in catlinks%}
+                    {%if catlink.listing_id is bid.item.id%}
+                        {% for category in categories%}
+                            {% if catlink.category_id is category.id %}
+                            <a href="{% url 'categories' category.category %}" class="btn btn-primary" name='{{category.category}}'>{{category.category}}</a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                </p>
+                <p class='card-text'><span style='font-weight : bold'>Created: </span>{{bid.item.date_added}}</p>
+                <p class='card-text'><span style='font-weight : bold'>By: </span>{{bid.item.user}}</p>
+            </div>
+            {% if user.is_authenticated %}    
+                {%if bid.item.id in watchlist %}
+                    <div class="card-footer">
+                        <a href="{% url 'watchlist' bid.item.id%}" class="card-text" name='{{bid.item.id}}'>Remove from Watchlist</a>
+                    </div>
+                {% else %}
+                    <div class="card-footer">
+                        <a href="{% url 'watchlist' bid.item.id %}" class="card-text" name='{{bid.item.id}}'>Add to Watchlist</a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>   
+        </div>
+    {% endif %}
     {% endfor %}
     </div> 
     </div>  

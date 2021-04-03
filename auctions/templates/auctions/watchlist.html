@@ -8,8 +8,8 @@ Watchlist
     <div class='container-fluid'>
     <div class='row justify-content-center'>
     {% for entry in watchlist %}
-        {% if entry.user == user %}
-        {% if not closed %}
+        {% if entry.user == user and entry.item.closed == False%}
+        
             <div class="col-4" style='display : inline-block'>
             <div class='card bg-light mb-3'>
             <h4 class="card-header"><a href="{% url 'listing' entry.item.id%}" class="text-dark">{{entry.item.name}}</a></h4>
@@ -32,7 +32,7 @@ Watchlist
                     {% endfor %}
                     </p>
                     <p class='card-text'><span style='font-weight : bold'>Created: </span>{{entry.item.date_added}}</p>
-                    <p class='card-text'><span style='font-weight : bold'>By: </span>{{entry.user}}</p>
+                    <p class='card-text'><span style='font-weight : bold'>By: </span>{{entry.item.user}}</p>
                     
                 </div>
                 <div class="card-footer">
@@ -40,7 +40,7 @@ Watchlist
                 </div>
             </div>   
             </div>
-        {% endif %}
+        
         {% endif %}
     {% empty %}
     <p>There are currently no items in your watchlist.</p>  
