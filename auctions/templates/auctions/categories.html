@@ -15,7 +15,6 @@ Categories
         {% endfor %}
         </div>
     {% else %}
-
     <div class='container-fluid'>
     <div class='row justify-content-center'>
     {% for listing in listings %}
@@ -67,6 +66,8 @@ Categories
             </div> 
         {% endif %}
         {% endif %} 
+        {% empty %}
+        <p><strong>No listings in the current category.</strong></p>
     {% endfor %}
     
     </div> 

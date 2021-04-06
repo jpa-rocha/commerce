@@ -7,7 +7,7 @@
     <div class='row'>
         <div class='col-8'>
         <h3 style='margin-bottom: 15px'>{{item.name}}</h3>
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and item.closed == False %}
             {% if user == item.user %}
                 <p>This item was listed by you.</p>
             {% else  %}
@@ -22,6 +22,7 @@
         <p>{{item.description}}</p>
         <h5>Current Price</h5>
         <p>{{item.price}} €</p>
+        {% if item.closed == False %}
         {% if user.is_authenticated %}
             {% if user != item.user %}
             <form action="{% url 'bids' %}" method="POST" enctype="multipart/form-data">
@@ -49,6 +50,9 @@
             {% endif %}
         {% else %}
             <p><strong>You must be logged in to place bids.</strong></p>
+        {% endif %}
+        {% else %}
+        <p><strong>This listing was closed.</strong></p>
         {% endif %}
         </div>
         <div class='col-4'>

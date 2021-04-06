@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.forms import ModelForm, Textarea
 from .models import Bids, Category, Comments, Listing, User, Watchlist
 
-
+# ModelForm used to create new listings
 class NewListingForm(ModelForm):
     class Meta:  
          model = Listing
@@ -21,15 +21,18 @@ class NewListingForm(ModelForm):
 
 
 def index(request):
+    # queries required to load index page
     user = request.user
     listings = Listing.objects.all
     catlinks = Listing.category.through.objects.all()
     categories = Category.objects.all
-    watchlist = Watchlist.objects.all
+
+    # wlist allows index to know if item is in watchlist or not
     wlist = []
     inlist = Watchlist.objects.filter(user_id=user.id)
     for i in inlist:
         wlist.append(i.item.id)
+
     return render(request, "auctions/index.html", {
         'listings' : listings,
         'catlinks' : catlinks,
@@ -39,11 +42,14 @@ def index(request):
 
 
 def watchlist(request, itemid):
+    # queries required for watchlist
     watchlist = Watchlist.objects.all
     listings = Listing.objects.all
     catlinks = Listing.category.through.objects.all()
     categories = Category.objects.all
     user = request.user
+
+    # if itemid is NOT blank, a query checks if the item already exists in the users watchlist, and add or deletes it accordingly
     if itemid != " ":
         itemid = int(itemid)
         item = Listing.objects.get(pk=itemid)
@@ -55,6 +61,8 @@ def watchlist(request, itemid):
         else:
             deletion = Watchlist.objects.filter(user_id=user.id, item_id = item).delete()
             return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+    # if itemid is blank the watchlist page is rendered
     else:
         return render(request, "auctions/watchlist.html",{
             'watchlist' : watchlist,
@@ -65,16 +73,21 @@ def watchlist(request, itemid):
 
 
 def categories(request, cat):
+    # queries required for categories page
     watchlist = Watchlist.objects.all
     listings = Listing.objects.all
     catlinks = Listing.category.through.objects.all()
     categories = Category.objects.all
+
+    # if arg cat is list the category page is rendered
     if cat == 'list':
         catlist = 'catlist'
         return render(request,'auctions/categories.html',{
             'categories' : categories,
             'catlist' : catlist
         })
+    
+    # else a page with the listings that belong to a certain category is rendered
     else:
         cat = cat
         category = Category.objects.get(category=cat)
@@ -93,6 +106,7 @@ def categories(request, cat):
 
 
 def listing(request, listnum):
+    # queries required for individual listings pages
     listnum = listnum
     listitem = Listing.objects.get(pk=listnum)
     watchlist = Watchlist.objects.all
@@ -100,20 +114,27 @@ def listing(request, listnum):
     catlinks = Listing.category.through.objects.all()
     categories = Category.objects.all
     user = request.user
+
+    # wlist allows index to know if item is in watchlist or not
     wlist = []
     inlist = Watchlist.objects.filter(user_id=user.id)
-    comments = Comments.objects.filter(item=listitem)
-    step = 0.1
-    price = int(listitem.price) + step
     for i in inlist:
         wlist.append(i.item.id)
+    # loads current listings comments
+    comments = Comments.objects.filter(item=listitem)
+    
+    # sets minimum price and steps
+    step = 0.1
+    price = int(listitem.price) + step
+    
+    # allows the creator of the listing to close it
     if request.method == 'POST':
         itemid = request.POST['item']
         item = Listing.objects.get(pk=itemid)
         item.closed = True
         item.save()
-        return HttpResponseRedirect(reverse("index"))
-        
+        return HttpResponseRedirect(reverse("index")) 
+
     return render(request,'auctions/listing.html',{
         'watchlist' : wlist,
         'listings' : listings,
@@ -127,11 +148,17 @@ def listing(request, listnum):
 
 
 def bids(request):
-    watchlist = Watchlist.objects.all
+    # queries required for bidding and 'Your Bids' page
+    user = request.user
     listings = Listing.objects.all
     catlinks = Listing.category.through.objects.all()
     categories = Category.objects.all
-    user = request.user
+    wlist = []
+    inlist = Watchlist.objects.filter(user_id=user.id)
+    for i in inlist:
+        wlist.append(i.item.id)
+
+    # bidding logic
     if request.method == 'POST':  
         itemid = request.POST['item']
         bid = float(request.POST['bid'])
@@ -142,25 +169,34 @@ def bids(request):
             item.price = bid
             item.save()
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    
+    # 'Your Bids' page
     else:
+        # allows that only one listing is rendered in the page even if more bids were made
         bids = Bids.objects.filter(user=user)
         bidset = set()
         for bid in bids:
-            print(bid.item.id)
             bidset.add(bid.item.id)
-        print(bidset)
-        # for bid in bids if:  bid.amount == bid.item.price bid.user gets green message else red
+        
+        # allows that winning bid is recognized
+        winbid = set()
+        for bid in bids:
+            listing = Listing.objects.get(pk=bid.item.id)
+            if bid.amount == listing.price:
+                winbid.add(listing.id)
         return render(request, 'auctions/bids.html',{
             'bids' : bids,
             'bidset' : bidset,
-            'watchlist' : watchlist,
+            'watchlist' : wlist,
             'listings' : listings,
             'catlinks' : catlinks,
             'categories' : categories,
+            'winbid' : winbid
         })  
 
 
 def comments(request):
+    #comment logic
     comment = request.POST['comment']
     user = request.user
     itemid = request.POST['item']
